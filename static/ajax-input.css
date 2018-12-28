@@ -1,0 +1,51 @@
+@charset "utf-8";
+/**
+ * Created by tanglihao on 2015/12/31.
+ * ajax-input.css 是一个基于jquery和ajax请求的输入框插件样式
+ */
+
+.ajax-input, .ajax-input input, .ajax-input ul, .ajax-input input ul li {
+    margin: 0;
+    padding: 0;
+}
+
+/* 默认的label是作为块元素显示的 */
+.ajax-input label {
+    display: block;
+}
+
+.ajax-input input {
+    height: 2.0em;
+    width: 100%;
+}
+
+ul.item-list {
+    z-index: 1000;
+    width: 100%;
+}
+
+ul.item-list li {
+    list-style: none;
+    background: #fff;;
+    height: 2.0em;
+    color: #888;
+    cursor: pointer;
+    border-right: solid 1px #ddd;
+    border-left: solid 1px #ddd;
+}
+
+ul.item-list li:first-child {
+    border-top: solid 1px #ddd;
+}
+
+ul.item-list li:last-child {
+    border-bottom: solid 1px #ddd;
+}
+
+/* li获取焦点的样式和控制li上下键选中的样式 */
+ul.item-list li:hover {
+    background: #ddd;
+}
+ul.item-list li.focus-li {
+    background: #ccc;
+}

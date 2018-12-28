@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>火车余票查询</title>
+</head>
+
+<body>
+<style>
+    /* Border styles */
+    #table-1 thead, #table-1 tr {
+        border-top-width: 1px;
+        border-top-style: solid;
+        border-top-color: rgb(230, 189, 189);
+    }
+
+    #table-1 {
+        border-bottom-width: 1px;
+        border-bottom-style: solid;
+        width: 100%;
+        border-bottom-color: rgb(230, 189, 189);
+    }
+
+    /* Padding and font style */
+    #table-1 td, #table-1 th {
+        padding: 5px 10px;
+        font-size: 12px;
+        font-family: Verdana;
+        color: rgb(177, 106, 104);
+    }
+
+    /* Alternating background colors */
+    #table-1 tr:nth-child(even) {
+        background: rgb(238, 211, 210)
+    }
+
+    #table-1 tr:nth-child(odd) {
+        background: #FFF
+    }
+
+    .fr {
+        padding: 10px;
+        min-height: 300px;
+    }
+
+    .fr > div {
+        margin-bottom: 20px;
+    }
+
+    .fr input {
+        width: 400px;
+        height: 50px;
+        border: 1px solid #3d3d3d;
+        border-radius: 4px;
+
+    }
+
+    button[type="submit"] {
+        background-color: rgb(250, 255, 189);
+        padding: 4px 12px;
+        min-width: 200px;
+        position: relative;
+        top: 20px;
+        color: #3d3d3d;
+    }
+
+    .a {
+        background-color: #4CAF50; /* Green */
+        border: none;
+        color: white;
+        padding: 16px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        -webkit-transition-duration: 0.4s; /* Safari */
+        transition-duration: 0.4s;
+        cursor: pointer;
+    }
+
+    .a1 {
+        background-color: rgb(250, 255, 189);
+        color: #4caf96;
+        border: 2px solid #4CAF50;
+    }
+
+    .a1:hover {
+        background-color: #4CAF50;
+        color: white;
+    }
+</style>
+<form action="/train" method="post">
+    <div class="fr">
+        {% csrf_token %}
+        <div><label style="font-size: 30px">时&nbsp间:</label> &nbsp &nbsp &nbsp<input id="time" type="date" name="time"
+                                                                                     style="font-size: 30px;"/></div>
+        <br/>
+        <div><label style="font-size: 30px">出发的:</label>&nbsp;<input id="place" type="text" name="place"
+                                                                     style="font-size: 30px"/></div>
+        <br/>
+        <div><label style="font-size: 30px">目的地:</label>&nbsp;<input id="destination" type="text" name="destination"
+                                                                     style="font-size: 30px"/></div>
+        <div style="width:100%;text-align:center;height:80px;">
+            <a class="a a1 " style="font-size: 30px" onclick="add()">查询</a>
+            {#            <button type="submit" style="font-size: 30px">查询</button>#}
+        </div>
+    </div>
+</form>
+<span id="train_info" style="    font-size: 20px;
+color: rgb(177, 106, 104);">{{ content.info }}</span>
+<table id="table-1"> <!-- Replace "table-1" with any of the design numbers -->
+    <thead>
+    <th>车次</th>
+    <th>出发站</th>
+    <th>目的地</th>
+    <th>出发时间</th>
+    <th>到达时间</th>
+    <th>消耗时间</th>
+    <th>一等座</th>
+    <th>二等座</th>
+    <th>软卧</th>
+    <th>硬卧</th>
+    <th>硬座</th>
+    <th>无座</th>
+    <th>动卧</th>
+    <th>高级动卧</th>
+    <th>商务</th>
+    </thead>
+    <tbody>
+    {% for train in content.train_info_list %}
+        <tr>
+
+            <td>{{ train.train_no }}</td>
+            <td>{{ train.from_station_name }}</td>
+            <td>{{ train.to_station_name }}</td>
+            <td>{{ train.start_time }}</td>
+            <td>{{ train.arrive_time }}</td>
+            <td>{{ train.time_fucked_up }}</td>
+            <td>{{ train.first_class_seat }}</td>
+            <td>{{ train.second_class_seat }}</td>
+            <td>{{ train.soft_sleep }}</td>
+            <td>{{ train.hard_sleep }}</td>
+            <td>{{ train.hard_seat }}</td>
+            <td>{{ train.no_seat }}</td>
+            <td>{{ train.Pneumatic_horizontal }}</td>
+            <td>{{ train.Advanced_dynamic_supine }}</td>
+            <td>{{ train.business_seat }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<script src="/static/jquery-3.2.1.min.js"></script>
+<script src="/static/jquery.cookie.js"></script>
+<script>
+    $(function () {
+        var dic = {{ dic|safe }};
+        $("#time").val(dic['time']);
+        $("#place").val(dic['place']);
+        $("#destination").val(dic['destination']);
+    })
+
+    function add() {
+        //csrftoken 验证
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                xhr.setRequestHeader('X-CSRFtoken', $.cookie('csrftoken'));
+            }
+        });
+        $.ajax(
+            {
+                url: "/train",
+                type: "POST",
+                data: {
+                    'time': $("#time").val(),
+                    "place": $("#place").val(),
+                    "destination": $("#destination").val()
+                },
+                success: function (data) {
+                    var dic = JSON.parse(data);
+                    status = dic.status
+                    info = dic.info;
+                    $('#train_info').text(info);
+                    train_info_list = dic.train_info_list;
+                    $('table tbody tr').remove();
+                    if (status == 1) {
+                        for (var i = 0; i < train_info_list.length; i++) {
+                            var tr = $("<tr>\
+            <td>" + train_info_list[i].train_no + "</td>\
+            <td>" + train_info_list[i].from_station_name + "</td>\
+            <td>" + train_info_list[i].to_station_name + "</td>\
+            <td>" + train_info_list[i].start_time + "</td>\
+            <td>" + train_info_list[i].arrive_time + "</td>\
+            <td>" + train_info_list[i].time_fucked_up + "</td>\
+            <td>" + train_info_list[i].first_class_seat + "</td>\
+            <td>" + train_info_list[i].second_class_seat + "</td>\
+            <td>" + train_info_list[i].soft_sleep + "</td>\
+            <td>" + train_info_list[i].hard_sleep + "</td>\
+            <td>" + train_info_list[i].hard_seat + "</td>\
+            <td>" + train_info_list[i].no_seat + "</td>\
+            <td>" + train_info_list[i].Pneumatic_horizontal + "</td>\
+            <td>" + train_info_list[i].Advanced_dynamic_supine + "</td>\
+            <td>" + train_info_list[i].business_seat + "</td>\
+        </tr>");
+                            $("table tbody").append(tr);
+                            if ((i+2 )% 5 ==0 ) {
+                                var tr = $("<tr>\
+                    <td>" + "车次" + "</td>\
+                    <td>" + "出发站" + "</td>\
+                    <td>" + "目的地" + "</td>\
+                    <td>" + "出发时间" + "</td>\
+                    <td>" + "到达时间" + "</td>\
+                    <td>" + "消耗时间" + "</td>\
+                    <td>" + "一等座" + "</td>\
+                    <td>" + "二等座" + "</td>\
+                    <td>" + "软卧" + "</td>\
+                    <td>" + "硬卧" + "</td>\
+                    <td>" + "硬座" + "</td>\
+                    <td>" + "无座" + "</td>\
+                    <td>" + "动卧" + "</td>\
+                    <td>" + "高级动卧" + "</td>\
+                    <td>" + "商务" + "</td>\
+                </tr>");
+                                $("table tbody").append(tr);
+                            }
+
+                        }
+                    }
+
+                }
+            }
+        );
+    };
+</script>
+</body>
+</html>
